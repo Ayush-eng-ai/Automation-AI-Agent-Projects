@@ -1,0 +1,9 @@
+﻿AI-Recruiter-Agent/backend/uploads/
+AI-Recruiter-Agent/backend/outputs/
+AI-Recruiter-Agent/backend/venv/
+AI-Recruiter-Agent/frontend/node_modules/
+*.jsonl
+*.gz
+*.pyc
+__pycache__/
+.env
