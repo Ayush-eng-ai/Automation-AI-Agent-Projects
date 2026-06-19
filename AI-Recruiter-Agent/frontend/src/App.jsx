@@ -214,6 +214,39 @@ function App() {
               <strong>Missing Skills:</strong>{" "}
               {(resumeResult.result.missing_skills || []).join(", ")}
             </p>
+
+            {resumeResult.result.why_score_low && (
+              <>
+                <h4>Why Score Is Low</h4>
+                <ul>
+                  {resumeResult.result.why_score_low.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {resumeResult.result.improvement_suggestions && (
+              <>
+                <h4>How To Improve Resume</h4>
+                <ul>
+                  {resumeResult.result.improvement_suggestions.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {resumeResult.result.project_suggestions && (
+              <>
+                <h4>Recommended Projects</h4>
+                <ul>
+                  {resumeResult.result.project_suggestions.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
         )}
       </div>
