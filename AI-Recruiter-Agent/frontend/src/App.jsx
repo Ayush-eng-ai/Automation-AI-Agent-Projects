@@ -335,6 +335,41 @@ function App() {
                 </div>
               )}
 
+              {candidate.hiring_recommendation && (
+                <div className="explain-box">
+                  <h4>AI Hiring Recommendation</h4>
+
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    {candidate.hiring_recommendation.recommendation}
+                  </p>
+
+                  <p>
+                    <strong>Confidence:</strong>{" "}
+                    {candidate.hiring_recommendation.confidence}%
+                  </p>
+
+                  <p>
+                    <strong>Decision:</strong>{" "}
+                    {candidate.hiring_recommendation.decision}
+                  </p>
+
+                  <h5>Strengths</h5>
+                  <ul>
+                    {(candidate.hiring_recommendation.strengths || []).map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+
+                  <h5>Risks</h5>
+                  <ul>
+                    {(candidate.hiring_recommendation.risks || []).map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <button onClick={() => generateInterviewQuestions(candidate)}>
                 Generate Interview Questions
               </button>

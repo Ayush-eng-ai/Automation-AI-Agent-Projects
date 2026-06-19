@@ -22,6 +22,7 @@ from fastapi.responses import FileResponse
 from app.dataset_parser import load_dataset
 from app.scoring_engine import calculate_dynamic_score
 from app.explanation_engine import generate_candidate_explanation
+from app.hiring_recommendation import generate_hiring_recommendation
 
 
 app = FastAPI(
@@ -221,7 +222,7 @@ async def rank_uploaded_dataset(
 
             profile = candidate.get("profile", {})
 
-            ranked_results.append({
+            candidate_result = {
                 "candidate_id": candidate.get("candidate_id") or candidate.get("id"),
                 "title": profile.get("current_title") or candidate.get("title"),
                 "experience": profile.get("years_of_experience") or candidate.get("experience"),
@@ -235,7 +236,11 @@ async def rank_uploaded_dataset(
                     f"Matched JD skills: {', '.join(score_result['jd_skill_matches'][:5])}"
                 ),
                 "explainability": generate_candidate_explanation(candidate, score_result),
-            })
+            }
+
+            candidate_result["hiring_recommendation"] = generate_hiring_recommendation(candidate_result)
+
+            ranked_results.append(candidate_result)
 
         ranked_results.sort(
             key=lambda x: x["dynamic_score"],
