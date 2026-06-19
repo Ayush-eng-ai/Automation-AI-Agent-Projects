@@ -3,7 +3,7 @@ import shutil
 import uuid
 
 import pandas as pd
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.schemas import AnalyzeRequest, RankRequest
@@ -181,20 +181,11 @@ def interview_questions(title: str):
 
 
 @app.post("/api/dataset/upload")
-async def upload_dataset(
-    file: UploadFile = File(...)
-):
-
-    file_path = os.path.join(
-        "uploads",
-        file.filename
-    )
+async def upload_dataset(file: UploadFile = File(...)):
+    file_path = os.path.join("uploads", file.filename)
 
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(
-            file.file,
-            buffer
-        )
+        shutil.copyfileobj(file.file, buffer)
 
     dataset = load_dataset(file_path)
 
@@ -202,67 +193,65 @@ async def upload_dataset(
         "message": "Dataset uploaded successfully",
         "filename": file.filename,
         "records_detected": dataset["total_records"],
-        "columns": dataset["columns"][:20]
+        "columns": dataset["columns"][:20],
     }
 
 
+@app.post("/api/rank/uploaded-dataset")
+async def rank_uploaded_dataset(
+    job_description: str = Form(...),
+    top_n: int = Form(10),
+    file: UploadFile = File(...)
+):
+    try:
+        file_path = os.path.join("uploads", file.filename)
 
-    @app.post("/api/rank/uploaded-dataset")
-    async def rank_uploaded_dataset(
-        job_description: str = Form(...),
-        top_n: int = Form(10),
-        file: UploadFile = File(...)
-    ):
-        try:
-            file_path = os.path.join("uploads", file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
 
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
+        dataset = load_dataset(file_path)
+        candidates = dataset["data"]
 
-            dataset = load_dataset(file_path)
-            candidates = dataset["data"]
+        jd_requirements = extract_jd_requirements(job_description)
 
-            jd_requirements = extract_jd_requirements(job_description)
+        ranked_results = []
 
-            ranked_results = []
+        for candidate in candidates:
+            score_result = calculate_dynamic_score(candidate, jd_requirements)
 
-            for candidate in candidates:
-                score_result = calculate_dynamic_score(candidate, jd_requirements)
+            profile = candidate.get("profile", {})
 
-                profile = candidate.get("profile", {})
+            ranked_results.append({
+                "candidate_id": candidate.get("candidate_id") or candidate.get("id"),
+                "title": profile.get("current_title") or candidate.get("title"),
+                "experience": profile.get("years_of_experience") or candidate.get("experience"),
+                "company": profile.get("current_company") or candidate.get("company"),
+                "location": profile.get("location") or candidate.get("location"),
+                "dynamic_score": score_result["dynamic_score"],
+                "jd_skill_matches": score_result["jd_skill_matches"],
+                "reason": (
+                    f"{profile.get('current_title') or candidate.get('title')} with "
+                    f"{profile.get('years_of_experience') or candidate.get('experience')} years experience. "
+                    f"Matched JD skills: {', '.join(score_result['jd_skill_matches'][:5])}"
+                ),
+                "explainability": generate_candidate_explanation(candidate, score_result),
+            })
 
-                ranked_results.append({
-                    "candidate_id": candidate.get("candidate_id") or candidate.get("id"),
-                    "title": profile.get("current_title") or candidate.get("title"),
-                    "experience": profile.get("years_of_experience") or candidate.get("experience"),
-                    "company": profile.get("current_company") or candidate.get("company"),
-                    "location": profile.get("location") or candidate.get("location"),
-                    "dynamic_score": score_result["dynamic_score"],
-                    "jd_skill_matches": score_result["jd_skill_matches"],
-                    "reason": (
-                        f"{profile.get('current_title') or candidate.get('title')} with "
-                        f"{profile.get('years_of_experience') or candidate.get('experience')} years experience. "
-                        f"Matched JD skills: {', '.join(score_result['jd_skill_matches'][:5])}"
-                    ),
-                    "explainability": generate_candidate_explanation(candidate, score_result)
-                })
+        ranked_results.sort(
+            key=lambda x: x["dynamic_score"],
+            reverse=True
+        )
 
-            ranked_results.sort(
-                key=lambda x: x["dynamic_score"],
-                reverse=True
-            )
+        return {
+            "message": "Uploaded dataset ranked successfully",
+            "filename": file.filename,
+            "total_records": dataset["total_records"],
+            "top_n": top_n,
+            "candidates": ranked_results[:top_n],
+        }
 
-            return {
-                "message": "Uploaded dataset ranked successfully",
-                "filename": file.filename,
-                "total_records": dataset["total_records"],
-                "top_n": top_n,
-                "candidates": ranked_results[:top_n]
-            }
-
-        except Exception as error:
-            raise HTTPException(
-                status_code=500,
-                detail=str(error)
-            )
-
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail=str(error)
+        )
