@@ -1,261 +1,324 @@
-# AI Recruiter Agent
+# 🚀 AI Recruiter Agent
 
 An AI-powered recruitment platform that helps recruiters discover, rank, evaluate, and shortlist the best candidates from large candidate datasets.
 
-The system combines Candidate Ranking, Explainable AI, Resume Matching, Interview Question Generation, and Hiring Recommendations into a single recruiter-friendly web application.
+The platform combines Candidate Ranking, Explainable AI, Resume Matching, Interview Question Generation, and Hiring Recommendations into a single recruiter-friendly web application.
 
 ---
 
-## Live Demo
+# 🌐 Live Demo
 
 ### Frontend
-
-Add your frontend URL here
+https://ai-recruiter-agent-frontend.onrender.com
 
 ### Backend API
-
-Add your backend URL here
+https://ai-recruiter-backend-7vet.onrender.com
 
 ### API Documentation
-
-Add your backend `/docs` URL here
-
----
-
-## Problem Statement
-
-Recruiters often need to manually screen hundreds or thousands of candidate profiles to find suitable candidates for a job role.
-
-This project automates the process by:
-
-* Understanding Job Descriptions
-* Ranking candidates using AI-based scoring
-* Explaining why candidates were selected
-* Matching resumes against job requirements
-* Generating interview questions
-* Providing hiring recommendations
+https://ai-recruiter-backend-7vet.onrender.com/docs
 
 ---
 
-## Features
+# 📌 Problem Statement
 
-### Candidate Dataset Upload
+Recruiters often spend hours manually screening hundreds or thousands of candidate profiles.
+
+The goal of this project is to:
+
+- Analyze Job Descriptions
+- Rank candidates intelligently
+- Explain ranking decisions
+- Match resumes with job requirements
+- Generate interview questions
+- Assist recruiters in hiring decisions
+
+---
+
+# ✨ Key Features
+
+## 1. Candidate Dataset Upload
 
 Upload candidate datasets in:
 
-* CSV
-* JSON
-* JSONL
+- JSON
+- JSONL
+- CSV
 
-Supports large candidate datasets for recruiter workflows.
-
----
-
-### AI Candidate Ranking
-
-Ranks candidates based on:
-
-* Skills Match
-* Role Match
-* Experience Match
-* AI/ML Skills
-* Career Evidence
-* Candidate Quality Signals
-
-Returns the most relevant candidates for a given job description.
+Supports large candidate datasets.
 
 ---
 
-### Explainable AI Ranking
+## 2. AI Candidate Ranking
+
+Candidates are ranked using:
+
+- Skill Match
+- Role Match
+- Experience Match
+- AI/ML Skills
+- Career Evidence
+- Behavioral Signals
+
+---
+
+## 3. Explainable AI Ranking
 
 Instead of showing only a score, the system explains:
 
-* Why the candidate was selected
-* Skills matched
-* Role matched
-* Experience matched
-* Confidence score
+- Why the candidate was selected
+- Skills matched
+- Experience matched
+- Career evidence found
+- Confidence score
 
 ---
 
-### Resume Match Analyzer
+## 4. Resume Match Analyzer
 
-Upload a candidate resume and compare it against a Job Description.
+Upload a resume and compare it with a Job Description.
 
 Outputs:
 
-* Match Score
-* Matched Skills
-* Missing Skills
-* Recommendation
+- Match Score
+- Matched Skills
+- Missing Skills
+- Recommendation
 
 ---
 
-### Resume Improvement Feedback
+## 5. Resume Improvement Suggestions
 
-Provides actionable feedback:
+Provides:
 
-* Why the score is low
-* Missing skills
-* Resume improvement suggestions
-* Recommended projects
-
----
-
-### AI Interview Question Generator
-
-Generates role-specific interview questions for:
-
-* Search Engineers
-* ML Engineers
-* Data Scientists
-* Backend Engineers
-* Recommendation Systems Engineers
+- Why the score is low
+- Missing skills
+- Resume improvement guidance
+- Recommended projects
 
 ---
 
-### AI Hiring Recommendation Engine
+## 6. AI Interview Question Generator
 
-Provides recruiter-friendly recommendations:
+Role-specific interview questions for:
 
-* Strongly Recommended
-* Recommended
-* Consider
-* Not Recommended
-
-Includes:
-
-* Strengths
-* Risks
-* Confidence Score
-* Hiring Decision Summary
+- Search Engineer
+- ML Engineer
+- Data Scientist
+- Backend Engineer
+- Recommendation Systems Engineer
 
 ---
 
-### Recruiter Analytics Dashboard
+## 7. AI Hiring Recommendation Engine
 
-Shows:
+Provides:
 
-* Total Records Processed
-* Candidates Returned
-* Average Score
-* Top Score
-* Confidence Metrics
+- Strongly Recommended
+- Recommended
+- Consider
+- Not Recommended
 
----
+Along with:
 
-## Tech Stack
-
-### Frontend
-
-* React.js
-* JavaScript
-* CSS
-
-### Backend
-
-* FastAPI
-* Python
-
-### Data Processing
-
-* Pandas
-* NumPy
-
-### Resume Parsing
-
-* pdfplumber
-* python-docx
-
-### Deployment
-
-* Render
-* GitHub
+- Strengths
+- Risks
+- Confidence Score
+- Hiring Decision Summary
 
 ---
 
-## Project Architecture
+## 8. Recruiter Analytics Dashboard
 
-Job Description
-↓
-JD Parser
-↓
-Candidate Ranking Engine
-↓
-Explainable AI
-↓
-Hiring Recommendation Engine
-↓
-Interview Question Generator
+Displays:
 
-Resume Upload
-↓
-Resume Parser
-↓
-Resume Match Analyzer
-↓
-Improvement Suggestions
+- Total Records Processed
+- Candidates Returned
+- Top Score
+- Average Score
+- Confidence Metrics
 
 ---
 
-## API Endpoints
+# 🛠 Tech Stack
 
-### Candidate Ranking
+## Frontend
 
-POST /api/rank/uploaded-dataset
+- React.js
+- JavaScript
+- CSS
+- Vite
 
-### Resume Upload
+## Backend
 
-POST /api/resume/upload
+- FastAPI
+- Python
 
-### Resume Match
+## Data Processing
 
-POST /api/resume/match
+- Pandas
+- NumPy
 
-### Interview Questions
+## Resume Parsing
 
-GET /api/interview/questions
+- pdfplumber
+- python-docx
 
-### Dataset Upload
+## Deployment
 
+- Render
+- GitHub
+
+---
+
+# 💻 Programming Languages
+
+- Python
+- JavaScript
+- HTML
+- CSS
+
+---
+
+# 📂 Project Structure
+
+```text
+AI-Recruiter-Agent
+│
+├── backend
+│   ├── app
+│   │   ├── dataset_parser.py
+│   │   ├── jd_parser.py
+│   │   ├── ranking_agent.py
+│   │   ├── scoring_engine.py
+│   │   ├── explanation_engine.py
+│   │   ├── interview_generator.py
+│   │   ├── hiring_recommendation.py
+│   │   ├── resume_parser.py
+│   │   ├── resume_matcher.py
+│   │   └── main.py
+│   │
+│   ├── uploads
+│   ├── outputs
+│   └── requirements.txt
+│
+├── frontend
+│   ├── public
+│   ├── src
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   └── main.jsx
+│   │
+│   ├── package.json
+│   └── vite.config.js
+│
+└── README.md
+```
+
+---
+
+# 🏗 System Architecture
+
+```text
+                    Job Description
+                           │
+                           ▼
+                    JD Parser Engine
+                           │
+                           ▼
+                  Candidate Ranking Engine
+                           │
+          ┌────────────────┼────────────────┐
+          ▼                ▼                ▼
+   Skill Matching   Experience Match   Role Match
+          │                │                │
+          └────────────────┼────────────────┘
+                           ▼
+                   Dynamic Scoring
+                           │
+                           ▼
+                 Explainable AI Layer
+                           │
+                           ▼
+              Hiring Recommendation Engine
+                           │
+                           ▼
+                 Interview Question Generator
+
+
+
+                    Resume Upload
+                           │
+                           ▼
+                    Resume Parser
+                           │
+                           ▼
+                 Resume Match Engine
+                           │
+                           ▼
+               Skill Gap Identification
+                           │
+                           ▼
+              Resume Improvement Feedback
+```
+
+---
+
+# 📡 API Endpoints
+
+## Dataset Upload
+
+```http
 POST /api/dataset/upload
+```
+
+## Candidate Ranking
+
+```http
+POST /api/rank/uploaded-dataset
+```
+
+## Resume Upload
+
+```http
+POST /api/resume/upload
+```
+
+## Resume Match
+
+```http
+POST /api/resume/match
+```
+
+## Interview Questions
+
+```http
+GET /api/interview/questions
+```
 
 ---
 
-## Screenshots
+# 📈 Future Improvements
 
-Add screenshots here:
-
-* Home Page
-* Candidate Ranking
-* Explainability
-* Resume Match
-* Hiring Recommendation
-* Analytics Dashboard
-
----
-
-## Future Improvements
-
-* PDF Hiring Reports
-* Advanced Candidate Search
-* Authentication & User Accounts
-* LLM-Based Candidate Evaluation
-* AI Resume Rewriting Suggestions
-* Recruiter Team Collaboration
+- PDF Hiring Reports
+- Candidate Search & Filters
+- Authentication System
+- Recruiter Accounts
+- LLM-Based Candidate Evaluation
+- AI Resume Rewriting
+- Advanced Analytics
 
 ---
 
-## Author
+# 👨‍💻 Author
 
-Ayush Rajput
+### Ayush Rajput
 
-* IIT Madras BS in Data Science
-* Data Analytics & AI Projects
-* GitHub: Ayush-eng-ai
+- IIT Madras BS in Data Science
+- Data Analytics & AI Projects
+- GitHub: Ayush-eng-ai
 
 ---
 
-## License
+# 📜 License
 
-This project is created for educational, portfolio, and hackathon purposes.
+This project was developed for educational, portfolio, and hackathon purposes.
