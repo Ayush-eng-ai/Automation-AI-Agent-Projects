@@ -220,3 +220,150 @@ button {
 .candidate-card button {
   margin-top: 12px;
 }
+.dashboard-stats {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.candidate-list-panel,
+.candidate-detail-panel {
+  background: #020617;
+  border: 1px solid #334155;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.candidate-list-panel h3 {
+  margin-top: 0;
+}
+
+.candidate-card-grid {
+  display: grid;
+  gap: 14px;
+  max-height: 720px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.mini-candidate-card {
+  width: 100%;
+  margin: 0;
+  text-align: left;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 16px;
+  color: #e5e7eb;
+  transition: 0.3s ease;
+}
+
+.mini-candidate-card:hover,
+.mini-candidate-card.active {
+  border-color: #22d3ee;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(34, 211, 238, 0.16);
+}
+
+.mini-candidate-card strong {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 16px;
+}
+
+.mini-candidate-card small {
+  color: #94a3b8;
+}
+
+.mini-candidate-card p {
+  margin: 8px 0 0;
+  color: #22d3ee;
+  font-weight: bold;
+}
+
+.slicer-row {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.slicer-row select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: #020617;
+  color: #ffffff;
+  border: 1px solid #334155;
+}
+
+.selected-dashboard {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.profile-card,
+.chart-card {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.profile-card {
+  grid-column: span 2;
+}
+
+.chart-card h3,
+.profile-card h3 {
+  margin-top: 0;
+}
+
+.dashboard-box {
+  margin-top: 0;
+}
+
+.skill-chip-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.skill-chip {
+  background: rgba(34, 211, 238, 0.12);
+  color: #67e8f9;
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .selected-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-card {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+}

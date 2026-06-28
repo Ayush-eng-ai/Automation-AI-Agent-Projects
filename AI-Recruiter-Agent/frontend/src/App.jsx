@@ -1,6 +1,5 @@
 import { useState } from "react"
 import "./App.css"
-import { useMemo, useState } from "react"
 import {
   BarChart,
   Bar,
@@ -10,8 +9,10 @@ import {
   ResponsiveContainer,
   RadialBarChart,
   RadialBar,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts"
-import "./App.css"
 
 const API_BASE_URL = "https://ai-recruiter-backend-7vet.onrender.com"
 
@@ -28,15 +29,16 @@ function App() {
 
   const [datasetLoading, setDatasetLoading] = useState(false)
   const [resumeLoading, setResumeLoading] = useState(false)
+  const [selectedCandidateId, setSelectedCandidateId] = useState("")
 
   const candidates = results?.candidates || []
 
   const selectedCandidate =
-  candidates.find(
-    (candidate) => String(candidate.candidate_id) === String(selectedCandidateId)
-  ) || candidates[0]
+    candidates.find(
+      (candidate) => String(candidate.candidate_id) === String(selectedCandidateId)
+    ) || candidates[0]
 
-const scoreChartData = selectedCandidate
+  const scoreChartData = selectedCandidate
   ? [
       {
         name: "Dynamic Score",
@@ -65,8 +67,6 @@ const skillChartData = selectedCandidate
       },
     ]
   : []
-
-  const [selectedCandidateId, setSelectedCandidateId] = useState("")
 
   const averageScore =
     candidates.length > 0
@@ -117,6 +117,9 @@ const skillChartData = selectedCandidate
     
 
       setResults(data)
+      setSelectedCandidateId(
+        data.candidates?.[0]?.candidate_id ? String(data.candidates[0].candidate_id) : ""
+      )
     } catch (error) {
       console.error("Dataset Ranking Error:", error)
       alert("Backend server running hai ya nahi check karo.")
@@ -124,7 +127,6 @@ const skillChartData = selectedCandidate
       setDatasetLoading(false)
     }
   }
-  setSelectedCandidateId(data.candidates?.[0]?.candidate_id || "")
 
   const analyzeResume = async () => {
     if (!jobDescription.trim()) {
@@ -303,208 +305,261 @@ const skillChartData = selectedCandidate
         )}
       </div>
 
-      {results && (
-        <div className="card results">
-          <h2>4. Ranked Candidate Results</h2>
+{results && (
+  <div className="card results">
+    <h2>4. Interactive Recruiter Dashboard</h2>
 
-          <div className="stats-grid">
-            <div className="stat-card">
-              <h3>{results.top_n || topN}</h3>
-              <p>Candidates Returned</p>
-            </div>
+    <div className="stats-grid dashboard-stats">
+      <div className="stat-card">
+        <h3>{results.top_n || topN}</h3>
+        <p>Candidates Returned</p>
+      </div>
 
-            <div className="stat-card">
-              <h3>{results.total_records || 0}</h3>
-              <p>Total Records Processed</p>
-            </div>
+      <div className="stat-card">
+        <h3>{results.total_records || 0}</h3>
+        <p>Total Records Processed</p>
+      </div>
 
-            <div className="stat-card">
-              <h3>{candidates[0]?.dynamic_score || 0}</h3>
-              <p>Top Score</p>
-            </div>
+      <div className="stat-card">
+        <h3>{candidates[0]?.dynamic_score || 0}</h3>
+        <p>Top Score</p>
+      </div>
 
-            <div className="stat-card">
-              <h3>{averageScore}</h3>
-              <p>Average Score</p>
-            </div>
+      <div className="stat-card">
+        <h3>{averageScore}</h3>
+        <p>Average Score</p>
+      </div>
 
-            <div className="stat-card">
-              <h3>{strongConfidenceCount}</h3>
-              <p>Strong Confidence</p>
+      <div className="stat-card">
+        <h3>{strongConfidenceCount}</h3>
+        <p>Strong Confidence</p>
+      </div>
+    </div>
+
+    {candidates.length === 0 && <p>No candidates found.</p>}
+
+    {candidates.length > 0 && (
+      <>
+        <div className="dashboard-layout">
+          <div className="candidate-list-panel">
+            <h3>Top Candidates</h3>
+
+            <div className="candidate-card-grid">
+              {candidates.map((candidate, index) => (
+                <button
+                  key={candidate.candidate_id || index}
+                  className={`mini-candidate-card ${
+                    String(selectedCandidate?.candidate_id) ===
+                    String(candidate.candidate_id)
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    setSelectedCandidateId(String(candidate.candidate_id))
+                  }
+                >
+                  <span className="rank-badge">#{index + 1}</span>
+                  <strong>{candidate.title || "Unknown Title"}</strong>
+                  <small>{candidate.company || "N/A"}</small>
+                  <p>Score: {candidate.dynamic_score || 0}</p>
+                </button>
+              ))}
             </div>
           </div>
 
-          {candidates.length === 0 && <p>No candidates found.</p>}
+          <div className="candidate-detail-panel">
+            <div className="slicer-row">
+              <label>Select Candidate</label>
 
-          {candidates.map((candidate, index) => (
-           <div className="dashboard-layout">
-              <div className="candidate-list-panel">
-                <h3>Top Candidates</h3>
-
+              <select
+                value={selectedCandidate?.candidate_id || ""}
+                onChange={(event) => setSelectedCandidateId(event.target.value)}
+              >
                 {candidates.map((candidate, index) => (
-                  <button
+                  <option
                     key={candidate.candidate_id || index}
-                    className={
-                      String(selectedCandidate?.candidate_id) ===
-                      String(candidate.candidate_id)
-                        ? "candidate-slicer active"
-                        : "candidate-slicer"
-                    }
-                    onClick={() => setSelectedCandidateId(candidate.candidate_id)}
+                    value={candidate.candidate_id}
                   >
-                    <span>#{index + 1}</span>
-                    <strong>{candidate.title || "Unknown Title"}</strong>
-                    <small>Score: {candidate.dynamic_score || 0}</small>
-                  </button>
+                    #{index + 1} - {candidate.title || "Unknown"} | Score{" "}
+                    {candidate.dynamic_score || 0}
+                  </option>
                 ))}
-              </div>
+              </select>
+            </div>
 
-              {selectedCandidate && (
-                <div className="candidate-detail-panel">
-                  <div className="candidate-profile-header">
-                    <div>
-                      <p className="rank-badge">Selected Candidate</p>
-                      <h2>{selectedCandidate.title || "Unknown Title"}</h2>
-                      <p>{selectedCandidate.company || "N/A"} • {selectedCandidate.location || "N/A"}</p>
-                    </div>
+            {selectedCandidate && (
+              <div className="selected-dashboard">
+                <div className="profile-card">
+                  <h3>{selectedCandidate.title || "Unknown Title"}</h3>
 
-                    <div className="big-score">
-                      {selectedCandidate.dynamic_score || 0}
-                      <span>Score</span>
-                    </div>
+                  <p>
+                    <strong>ID:</strong>{" "}
+                    {selectedCandidate.candidate_id || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Company:</strong>{" "}
+                    {selectedCandidate.company || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Location:</strong>{" "}
+                    {selectedCandidate.location || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Experience:</strong>{" "}
+                    {selectedCandidate.experience || 0} years
+                  </p>
+
+                  <p className="score">
+                    <strong>Dynamic Score:</strong>{" "}
+                    {selectedCandidate.dynamic_score || 0}
+                  </p>
+
+                  <p className="reason">
+                    <strong>Reason:</strong>{" "}
+                    {selectedCandidate.reason || "No reason available"}
+                  </p>
+                </div>
+
+                <div className="chart-card">
+                  <h3>Candidate Score Breakdown</h3>
+
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={scoreChartData}>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#22d3ee" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="chart-card">
+                  <h3>Skill Match Overview</h3>
+
+                  <ResponsiveContainer width="100%" height={260}>
+                    <PieChart>
+                      <Pie
+                        data={skillChartData}
+                        dataKey="value"
+                        nameKey="name"
+                        outerRadius={90}
+                        label
+                      >
+                        {skillChartData.map((entry, index) => (
+                          <Cell
+                            key={index}
+                            fill={index === 0 ? "#06b6d4" : "#7c3aed"}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="explain-box dashboard-box">
+                  <h4>Why Selected</h4>
+
+                  <p>
+                    <strong>Confidence:</strong>{" "}
+                    {selectedCandidate.explainability?.confidence || 0}%
+                  </p>
+
+                  <ul>
+                    {(selectedCandidate.explainability?.why_selected || []).map(
+                      (item, idx) => (
+                        <li key={idx}>{item}</li>
+                      )
+                    )}
+                  </ul>
+                </div>
+
+                <div className="explain-box dashboard-box">
+                  <h4>Matched JD Skills</h4>
+
+                  <div className="skill-chip-wrap">
+                    {(selectedCandidate.jd_skill_matches || []).length > 0 ? (
+                      selectedCandidate.jd_skill_matches.map((skill, idx) => (
+                        <span key={idx} className="skill-chip">
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <p>No matched skills available.</p>
+                    )}
                   </div>
+                </div>
 
-                  <div className="mini-info-grid">
-                    <div>
-                      <strong>ID</strong>
-                      <span>{selectedCandidate.candidate_id || "N/A"}</span>
-                    </div>
+                {selectedCandidate.hiring_recommendation && (
+                  <div className="explain-box dashboard-box">
+                    <h4>AI Hiring Recommendation</h4>
 
-                    <div>
-                      <strong>Experience</strong>
-                      <span>{selectedCandidate.experience || 0} years</span>
-                    </div>
+                    <p>
+                      <strong>Status:</strong>{" "}
+                      {selectedCandidate.hiring_recommendation.recommendation}
+                    </p>
 
-                    <div>
-                      <strong>Confidence</strong>
-                      <span>{selectedCandidate.explainability?.confidence || 0}%</span>
-                    </div>
-                  </div>
+                    <p>
+                      <strong>Confidence:</strong>{" "}
+                      {selectedCandidate.hiring_recommendation.confidence}%
+                    </p>
 
-                  <div className="dashboard-charts">
-                    <div className="chart-card">
-                      <h3>Score Breakdown</h3>
-                      <ResponsiveContainer width="100%" height={220}>
-                        <BarChart data={scoreChartData}>
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="value" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    <p>
+                      <strong>Decision:</strong>{" "}
+                      {selectedCandidate.hiring_recommendation.decision}
+                    </p>
 
-                    <div className="chart-card">
-                      <h3>Candidate Signals</h3>
-                      <ResponsiveContainer width="100%" height={220}>
-                        <BarChart data={skillChartData}>
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="value" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-
-                  <div className="explain-box">
-                    <h4>Why Selected</h4>
-                    <p>{selectedCandidate.reason || "No reason available"}</p>
-
+                    <h5>Strengths</h5>
                     <ul>
-                      {(selectedCandidate.explainability?.why_selected || []).map(
+                      {(selectedCandidate.hiring_recommendation.strengths || []).map(
+                        (item, idx) => (
+                          <li key={idx}>{item}</li>
+                        )
+                      )}
+                    </ul>
+
+                    <h5>Risks</h5>
+                    <ul>
+                      {(selectedCandidate.hiring_recommendation.risks || []).map(
                         (item, idx) => (
                           <li key={idx}>{item}</li>
                         )
                       )}
                     </ul>
                   </div>
+                )}
 
-                  <div className="explain-box">
-                    <h4>Matched JD Skills</h4>
-
-                    <div className="skill-pills">
-                      {(selectedCandidate.jd_skill_matches || []).length > 0 ? (
-                        selectedCandidate.jd_skill_matches.map((skill, idx) => (
-                          <span key={idx}>{skill}</span>
-                        ))
-                      ) : (
-                        <p>No matched skills found.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {selectedCandidate.hiring_recommendation && (
-                    <div className="explain-box">
-                      <h4>AI Hiring Recommendation</h4>
-
-                      <p>
-                        <strong>Status:</strong>{" "}
-                        {selectedCandidate.hiring_recommendation.recommendation}
-                      </p>
-
-                      <p>
-                        <strong>Confidence:</strong>{" "}
-                        {selectedCandidate.hiring_recommendation.confidence}%
-                      </p>
-
-                      <p>
-                        <strong>Decision:</strong>{" "}
-                        {selectedCandidate.hiring_recommendation.decision}
-                      </p>
-
-                      <h5>Strengths</h5>
-                      <ul>
-                        {(selectedCandidate.hiring_recommendation.strengths || []).map(
-                          (item, idx) => (
-                            <li key={idx}>{item}</li>
-                          )
-                        )}
-                      </ul>
-
-                      <h5>Risks</h5>
-                      <ul>
-                        {(selectedCandidate.hiring_recommendation.risks || []).map(
-                          (item, idx) => (
-                            <li key={idx}>{item}</li>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                  )}
+                <div className="explain-box dashboard-box">
+                  <h4>Interview Questions</h4>
 
                   <button onClick={() => generateInterviewQuestions(selectedCandidate)}>
                     Generate Interview Questions
                   </button>
 
                   {interviewQuestions[selectedCandidate.candidate_id] && (
-                    <div className="explain-box">
-                      <h4>Interview Questions</h4>
-
-                      <ul>
-                        {interviewQuestions[selectedCandidate.candidate_id].map(
-                          (question, idx) => (
-                            <li key={idx}>{question}</li>
-                          )
-                        )}
-                      </ul>
-                    </div>
+                    <ul>
+                      {interviewQuestions[selectedCandidate.candidate_id].map(
+                        (question, idx) => (
+                          <li key={idx}>{question}</li>
+                        )
+                      )}
+                    </ul>
                   )}
                 </div>
-              )}
-            </div> 
-  )
-}
+              </div>
+            )}
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+)}
+
+
+
 
 export default App
 
