@@ -1,0 +1,28 @@
+team_name: "Ayush Rajput - AI Recruiter Agent"
+primary_contact:
+  name: "Ayush Rajput"
+  email: "ayushrajput8404@gmail.com"
+  phone: ""
+
+team_members:
+  - name: "Ayush Rajput"
+    email: "ayushrajput8404@gmail.com"
+
+github_repository_url: "https://github.com/Ayush-eng-ai/Automation-AI-Agent-Projects"
+sandbox_demo_link: "https://ai-recruiter-agent-frontend.onrender.com/"
+backend_api_docs: "https://ai-recruiter-backend-7vet.onrender.com/docs"
+portfolio_url: "https://data-analysis-portfolio-six.vercel.app/"
+medium_article_url: "https://medium.com/@ayushrajput8404/how-i-built-an-ai-recruiter-agent-from-hackathon-problem-to-full-stack-ai-product-e8feb9281cf2"
+
+ai_tools_declared:
+  - "ChatGPT"
+  - "OpenAI"
+
+compute_environment_summary: "Windows laptop, Python 3.x, CPU-only ranking, local 16GB-class environment, no external API calls during ranking."
+
+submission_file: "backend/outputs/final_submission.csv"
+reproduction_command: "python rank.py --candidates candidates.jsonl --out outputs/submission.csv"
+validation_command: "python validate_submission.py outputs/submission.csv"
+
+methodology_summary: >
+  AI Recruiter Agent ranks candidates for the Redrob Senior AI Engineer JD using a CPU-only scoring pipeline focused on the actual intent of the role, not only keyword overlap. The ranker evaluates title fit, 5–9 years experience alignment, production ML evidence, retrieval/ranking/search/recommendation system experience, embeddings/vector database exposure, evaluation signals such as NDCG/MRR/MAP/A/B testing, location/relocation fit, and Redrob behavioral signals such as recruiter response rate, last activity, open-to-work status, interview completion, GitHub activity, and notice period. It also applies penalties for unrelated roles, weak availability, service-only patterns, and possible honeypot-like inconsistencies. The output is a validated top-100 CSV with candidate_id, rank, score, and profile-grounded reasoning for manual review.
