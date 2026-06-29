@@ -1,24 +1,47 @@
 import json
+import os
 from pathlib import Path
 
 from app.scoring_engine import calculate_score, calculate_dynamic_score
+from app.explanation_engine import generate_candidate_explanation
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
 
 FULL_DATA_PATH = Path(
-    r"D:\OFF Campuse Learning\Data Analysis project\Data_Analysis_projects\Hackathon_Projects\Redrob-Hackathon\data\candidates.jsonl"
+    os.getenv("CANDIDATES_FULL_PATH", DATA_DIR / "candidates.jsonl")
 )
 
 SAMPLE_DATA_PATH = Path(
-    r"D:\OFF Campuse Learning\Data Analysis project\Data_Analysis_projects\Hackathon_Projects\Redrob-Hackathon\data\sample_candidates.json"
+    os.getenv("CANDIDATES_SAMPLE_PATH", DATA_DIR / "sample_candidates.json")
 )
-from app.explanation_engine import generate_candidate_explanation
+
+
+def _missing_file_message(path):
+    return (
+        f"Dataset file not found: {path}. "
+        "Upload a dataset using /api/rank/uploaded-dataset or set "
+        "CANDIDATES_FULL_PATH / CANDIDATES_SAMPLE_PATH environment variables."
+    )
 
 
 def load_sample_candidates():
+    if not SAMPLE_DATA_PATH.exists():
+        raise FileNotFoundError(_missing_file_message(SAMPLE_DATA_PATH))
+
     with open(SAMPLE_DATA_PATH, "r", encoding="utf-8") as file:
-        return json.load(file)
+        data = json.load(file)
+
+    if isinstance(data, dict):
+        return data.get("candidates", data.get("data", [data]))
+
+    return data
 
 
 def iter_full_candidates():
+    if not FULL_DATA_PATH.exists():
+        raise FileNotFoundError(_missing_file_message(FULL_DATA_PATH))
+
     with open(FULL_DATA_PATH, "r", encoding="utf-8") as file:
         for line in file:
             if line.strip():
@@ -56,7 +79,7 @@ def build_reason(candidate, score_result):
     return (
         f"{profile.get('current_title')} with {profile.get('years_of_experience')} years experience. "
         f"Matched evidence: {evidence_text}. "
-        f"Score combines title, experience, AI skills, career evidence, behavior signals and penalties."
+        "Score combines title, experience, AI skills, career evidence, behavior signals and penalties."
     )
 
 
@@ -108,7 +131,7 @@ def build_dynamic_reason(candidate, score_result):
     return (
         f"{profile.get('current_title')} with {profile.get('years_of_experience')} years experience. "
         f"JD match evidence: {jd_text}. "
-        f"Rank combines JD fit, base candidate quality, AI skills, career evidence and behavior signals."
+        "Rank combines JD fit, base candidate quality, AI skills, career evidence and behavior signals."
     )
 
 
