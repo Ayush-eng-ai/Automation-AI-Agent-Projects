@@ -1,45 +1,53 @@
-﻿AI-Recruiter-Agent/backend/uploads/
-AI-Recruiter-Agent/backend/outputs/
-AI-Recruiter-Agent/backend/venv/
-AI-Recruiter-Agent/frontend/node_modules/
-*.jsonl
-*.gz
-*.pyc
-__pycache__/
-.env
-
+﻿# =========================
 # Python
+# =========================
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
 
+# =========================
 # Virtual Environment
+# =========================
 .venv/
 venv/
+backend/venv/
 
-# Large Dataset
-backend/candidates.jsonl
-backend/candidates.jsonl.gz
-
-# Uploads
-backend/uploads/
-
-# Generated Outputs
-backend/outputs/
-!backend/outputs/.gitkeep
-
-# Node
-node_modules/
-
-# Environment
+# =========================
+# Environment Variables
+# =========================
 .env
 .env.*
 
+# =========================
+# Large Datasets
+# =========================
+*.jsonl
+*.gz
+backend/candidates.jsonl
+backend/candidates.jsonl.gz
+
+# =========================
+# Backend Generated Files
+# =========================
+backend/uploads/
+backend/outputs/
+!backend/outputs/.gitkeep
+
+# =========================
+# Frontend
+# =========================
+node_modules/
+frontend/node_modules/
+
+# =========================
 # IDE
+# =========================
 .vscode/
 .idea/
 
-# OS
+# =========================
+# OS Files
+# =========================
 .DS_Store
 Thumbs.db
