@@ -7,3 +7,39 @@ AI-Recruiter-Agent/frontend/node_modules/
 *.pyc
 __pycache__/
 .env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+.venv/
+venv/
+
+# Large Dataset
+backend/candidates.jsonl
+backend/candidates.jsonl.gz
+
+# Uploads
+backend/uploads/
+
+# Generated Outputs
+backend/outputs/
+!backend/outputs/.gitkeep
+
+# Node
+node_modules/
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
