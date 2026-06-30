@@ -1,3 +1,5 @@
+
+
 import { useMemo, useState } from "react"
 import "./App.css"
 import {
@@ -278,6 +280,13 @@ function App() {
     }
   }
 
+  {loading && (
+    <div className="loading-card">
+      <img src="/brand/loading-logo.png" alt="Loading AI Recruiter Agent" className="loading-logo" />
+      <p>AI is ranking candidates...</p>
+    </div>
+  )}
+
   const generateInterviewQuestions = async (candidate) => {
     if (!candidate) return
 
@@ -449,6 +458,7 @@ function App() {
           </button>
         </div>
       </section>
+      
 
       {resumeResult?.result && (
         <section className="glass-card resume-report">
