@@ -50,7 +50,7 @@ function App() {
   const [selectedCandidateId, setSelectedCandidateId] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [recommendationFilter, setRecommendationFilter] = useState("all")
-  const [minScore, setMinScore] = useState("")
+  const [minScore, setMinScore] = useState(50);
 
   const candidates = results?.candidates || []
 
