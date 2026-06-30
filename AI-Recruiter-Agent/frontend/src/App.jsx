@@ -1,5 +1,3 @@
-
-
 import { useMemo, useState } from "react"
 import "./App.css"
 import {
@@ -280,12 +278,6 @@ function App() {
     }
   }
 
-  {loading && (
-    <div className="loading-card">
-      <img src="/brand/loading-logo.png" alt="Loading AI Recruiter Agent" className="loading-logo" />
-      <p>AI is ranking candidates...</p>
-    </div>
-  )}
 
   const generateInterviewQuestions = async (candidate) => {
     if (!candidate) return
@@ -354,14 +346,21 @@ function App() {
   return (
     <main className="app-shell">
       <section className="hero-panel">
-        <div>
-          <span className="eyebrow">Redrob Hackathon • AI Recruitment Platform</span>
-          <h1>AI Recruiter Agent</h1>
-          <p>
-            Premium recruiter dashboard for JD parsing, resume intelligence,
-            candidate ranking, explainable AI recommendations, and interview
-            question generation.
-          </p>
+        <div className="brand-row">
+          <img
+            src="/brand/navbar-logo.png"
+            alt="AI Recruiter Agent Logo"
+            className="navbar-logo"
+          />
+          <div>
+            <span className="eyebrow">Redrob Hackathon • AI Recruitment Platform</span>
+            <h1>AI Recruiter Agent</h1>
+            <p>
+              Premium recruiter dashboard for JD parsing, resume intelligence,
+              candidate ranking, explainable AI recommendations, and interview
+              question generation.
+            </p>
+          </div>
         </div>
 
         <div className="hero-actions">
@@ -432,6 +431,17 @@ function App() {
           <button onClick={rankUploadedDataset} disabled={datasetLoading}>
             {datasetLoading ? "Ranking Dataset..." : "Rank Uploaded Dataset"}
           </button>
+
+          {datasetLoading && (
+            <div className="loading-card">
+              <img
+                src="/brand/loading-logo.png"
+                alt="Loading AI Recruiter Agent"
+                className="loading-logo"
+              />
+              <p>AI is ranking candidates...</p>
+            </div>
+          )}
         </div>
 
         <div className="glass-card input-card">
