@@ -10,13 +10,36 @@ import {
   PieChart,
   Pie,
   Cell,
+  LineChart,
+  Line,
+  CartesianGrid,
 } from "recharts"
 
 const API_BASE_URL = "https://ai-recruiter-backend-7vet.onrender.com"
 
+const REDROB_JD = `Senior AI Engineer — Founding Team
+
+Company: Redrob AI
+Location: Pune/Noida, India
+Employment Type: Full-time
+Experience Required: 5–9 years
+
+We need someone with deep technical depth in modern ML systems — embeddings, retrieval, ranking, LLMs, fine-tuning — and a scrappy product-engineering attitude.
+
+The role owns the intelligence layer of the product: ranking, retrieval, matching systems, candidate-JD matching, recruiter search quality, evaluation infrastructure, offline benchmarks, online A/B testing, recruiter feedback loops, and production AI systems.
+
+Required:
+- Production experience with embeddings-based retrieval systems
+- Vector databases or hybrid search infrastructure such as FAISS, Pinecone, Qdrant, Milvus, OpenSearch, Elasticsearch
+- Strong Python
+- Evaluation frameworks for ranking systems such as NDCG, MRR, MAP, A/B testing
+- Search, recommendation, ranking, retrieval, production ML, and product engineering experience
+- Preference for candidates around 5–9 years with product-company AI/ML experience
+- Strong behavioral signals such as recruiter response rate, open-to-work status, recent activity, and short notice period`
+
 function App() {
   const [jobDescription, setJobDescription] = useState("")
-  const [topN, setTopN] = useState(5)
+  const [topN, setTopN] = useState(50)
   const [datasetFile, setDatasetFile] = useState(null)
   const [resumeFile, setResumeFile] = useState(null)
   const [results, setResults] = useState(null)
@@ -25,32 +48,102 @@ function App() {
   const [datasetLoading, setDatasetLoading] = useState(false)
   const [resumeLoading, setResumeLoading] = useState(false)
   const [selectedCandidateId, setSelectedCandidateId] = useState("")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [recommendationFilter, setRecommendationFilter] = useState("all")
+  const [minScore, setMinScore] = useState("")
 
   const candidates = results?.candidates || []
 
+  const filteredCandidates = useMemo(() => {
+    return candidates.filter((candidate) => {
+      const searchText = [
+        candidate.candidate_id,
+        candidate.title,
+        candidate.company,
+        candidate.location,
+        ...(candidate.jd_skill_matches || []),
+      ]
+        .join(" ")
+        .toLowerCase()
+
+      const matchesSearch = searchText.includes(searchTerm.toLowerCase())
+      const recommendation =
+        candidate.hiring_recommendation?.recommendation || "Unknown"
+      const matchesRecommendation =
+        recommendationFilter === "all" || recommendation === recommendationFilter
+      const matchesScore =
+        minScore === "" || Number(candidate.dynamic_score || 0) >= Number(minScore)
+
+      return matchesSearch && matchesRecommendation && matchesScore
+    })
+  }, [candidates, searchTerm, recommendationFilter, minScore])
+
   const selectedCandidate =
+    filteredCandidates.find(
+      (candidate) => String(candidate.candidate_id) === String(selectedCandidateId)
+    ) ||
     candidates.find(
       (candidate) => String(candidate.candidate_id) === String(selectedCandidateId)
-    ) || candidates[0]
+    ) ||
+    filteredCandidates[0] ||
+    candidates[0]
 
   const averageScore = useMemo(() => {
     if (candidates.length === 0) return 0
-
     const totalScore = candidates.reduce(
       (sum, candidate) => sum + Number(candidate.dynamic_score || 0),
       0
     )
-
     return (totalScore / candidates.length).toFixed(2)
+  }, [candidates])
+
+  const recommendedCount = useMemo(
+    () =>
+      candidates.filter((candidate) =>
+        ["Strongly Recommended", "Recommended"].includes(
+          candidate.hiring_recommendation?.recommendation
+        )
+      ).length,
+    [candidates]
+  )
+
+  const averageConfidence = useMemo(() => {
+    if (candidates.length === 0) return 0
+    const totalConfidence = candidates.reduce(
+      (sum, candidate) =>
+        sum +
+        Number(
+          candidate.hiring_recommendation?.confidence ||
+            candidate.explainability?.confidence ||
+            0
+        ),
+      0
+    )
+    return (totalConfidence / candidates.length).toFixed(1)
   }, [candidates])
 
   const strongConfidenceCount = useMemo(
     () =>
       candidates.filter(
-        (candidate) => Number(candidate.explainability?.confidence || 0) >= 80
+        (candidate) =>
+          Number(
+            candidate.hiring_recommendation?.confidence ||
+              candidate.explainability?.confidence ||
+              0
+          ) >= 75
       ).length,
     [candidates]
   )
+
+  const recommendationOptions = useMemo(() => {
+    const unique = new Set(
+      candidates.map(
+        (candidate) =>
+          candidate.hiring_recommendation?.recommendation || "Unknown"
+      )
+    )
+    return Array.from(unique)
+  }, [candidates])
 
   const scoreChartData = selectedCandidate
     ? [
@@ -60,7 +153,11 @@ function App() {
         },
         {
           name: "Confidence",
-          value: Number(selectedCandidate.explainability?.confidence || 0),
+          value: Number(
+            selectedCandidate.hiring_recommendation?.confidence ||
+              selectedCandidate.explainability?.confidence ||
+              0
+          ),
         },
       ]
     : []
@@ -82,13 +179,16 @@ function App() {
       ]
     : []
 
+  const rankTrendData = filteredCandidates.slice(0, 10).map((candidate, index) => ({
+    rank: `#${index + 1}`,
+    score: Number(candidate.dynamic_score || 0),
+  }))
+
   const readApiResponse = async (response) => {
     const contentType = response.headers.get("content-type") || ""
-
     if (contentType.includes("application/json")) {
       return response.json()
     }
-
     return {
       detail: await response.text(),
     }
@@ -205,166 +305,318 @@ function App() {
     }
   }
 
+  const downloadDashboardCsv = () => {
+    if (candidates.length === 0) {
+      alert("No candidates available to export.")
+      return
+    }
+
+    const header = ["candidate_id", "rank", "score", "reasoning"]
+
+    const rows = candidates.map((candidate, index) => {
+      const reasoning =
+        candidate.reason ||
+        candidate.explainability?.why_selected?.join(" | ") ||
+        "Candidate ranked by AI Recruiter Agent."
+
+      return [
+        candidate.candidate_id || "",
+        index + 1,
+        Number(candidate.dynamic_score || 0),
+        `"${String(reasoning).replaceAll('"', '""')}"`,
+      ].join(",")
+    })
+
+    const csv = [header.join(","), ...rows].join("\n")
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = "ai_recruiter_ranked_candidates.csv"
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const loadRedrobJd = () => {
+    setJobDescription(REDROB_JD)
+    setTopN(100)
+  }
+
   return (
-    <div className="container">
-      <div className="header">
-        <h1>AI Recruiter Agent</h1>
-        <p>Bulk Candidate Ranking + Individual Resume Match Platform</p>
-      </div>
+    <main className="app-shell">
+      <section className="hero-panel">
+        <div>
+          <span className="eyebrow">Redrob Hackathon • AI Recruitment Platform</span>
+          <h1>AI Recruiter Agent</h1>
+          <p>
+            Premium recruiter dashboard for JD parsing, resume intelligence,
+            candidate ranking, explainable AI recommendations, and interview
+            question generation.
+          </p>
+        </div>
 
-      <div className="card">
-        <h2>1. Job Description</h2>
-        <p>Paste the hiring requirement.</p>
+        <div className="hero-actions">
+          <button type="button" onClick={loadRedrobJd}>
+            Load Redrob JD
+          </button>
+          <a href={API_BASE_URL + "/docs"} target="_blank" rel="noreferrer">
+            Backend API Docs
+          </a>
+        </div>
+      </section>
 
-        <textarea
-          rows="8"
-          placeholder="Paste job description here..."
-          value={jobDescription}
-          onChange={(event) => setJobDescription(event.target.value)}
-        />
-
-        <label htmlFor="top-n">Top Candidates Required</label>
-        <input
-          id="top-n"
-          type="number"
-          min="1"
-          max="100"
-          value={topN}
-          onChange={(event) => setTopN(Number(event.target.value))}
-        />
-      </div>
-
-      <div className="card">
-        <h2>2. Bulk Candidate Dataset Ranking</h2>
-        <p>Upload CSV, JSON, or JSONL candidate dataset.</p>
-
-        <input
-          type="file"
-          accept=".csv,.json,.jsonl"
-          onChange={(event) => setDatasetFile(event.target.files?.[0] || null)}
-        />
-
-        {datasetFile && <p>Selected Dataset: {datasetFile.name}</p>}
-
-        <button onClick={rankUploadedDataset} disabled={datasetLoading}>
-          {datasetLoading ? "Ranking Dataset..." : "Rank Uploaded Dataset"}
-        </button>
-      </div>
-
-      <div className="card">
-        <h2>3. Individual Resume Match</h2>
-        <p>This is independent from ranked candidate results.</p>
-
-        <input
-          type="file"
-          accept=".pdf,.docx"
-          onChange={(event) => setResumeFile(event.target.files?.[0] || null)}
-        />
-
-        {resumeFile && <p>Selected Resume: {resumeFile.name}</p>}
-
-        <button onClick={analyzeResume} disabled={resumeLoading}>
-          {resumeLoading ? "Analyzing Resume..." : "Analyze Resume Match"}
-        </button>
-
-        {resumeResult?.result && (
-          <div className="candidate-card">
-            <h3>Resume Match Result</h3>
-
-            <p className="score">
-              <strong>Match Score:</strong> {resumeResult.result.match_score}%
-            </p>
-
-            <p>
-              <strong>Recommendation:</strong> {resumeResult.result.recommendation}
-            </p>
-
-            <p>
-              <strong>Matched Skills:</strong>{" "}
-              {(resumeResult.result.matched_skills || []).join(", ") || "None"}
-            </p>
-
-            <p>
-              <strong>Missing Skills:</strong>{" "}
-              {(resumeResult.result.missing_skills || []).join(", ") || "None"}
-            </p>
-
-            {resumeResult.result.why_score_low && (
-              <>
-                <h4>Why Score Is Low</h4>
-                <ul>
-                  {resumeResult.result.why_score_low.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-
-            {resumeResult.result.improvement_suggestions && (
-              <>
-                <h4>How To Improve Resume</h4>
-                <ul>
-                  {resumeResult.result.improvement_suggestions.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-
-            {resumeResult.result.project_suggestions && (
-              <>
-                <h4>Recommended Projects</h4>
-                <ul>
-                  {resumeResult.result.project_suggestions.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
-              </>
-            )}
+      <section className="workflow-grid">
+        <div className="glass-card input-card">
+          <div className="section-title">
+            <span>01</span>
+            <div>
+              <h2>Job Description</h2>
+              <p>Paste hiring requirements or load the Redrob AI Engineer JD.</p>
+            </div>
           </div>
-        )}
-      </div>
+
+          <textarea
+            rows="9"
+            placeholder="Paste job description here..."
+            value={jobDescription}
+            onChange={(event) => setJobDescription(event.target.value)}
+          />
+
+          <div className="form-grid">
+            <div>
+              <label htmlFor="top-n">Top Candidates Required</label>
+              <input
+                id="top-n"
+                type="number"
+                min="1"
+                max="100"
+                value={topN}
+                onChange={(event) => setTopN(Number(event.target.value))}
+              />
+            </div>
+
+            <div className="hint-box">
+              For official hackathon output, use <strong>100</strong> candidates.
+            </div>
+          </div>
+        </div>
+
+        <div className="glass-card input-card">
+          <div className="section-title">
+            <span>02</span>
+            <div>
+              <h2>Bulk Candidate Ranking</h2>
+              <p>Upload CSV, JSON, or JSONL candidate dataset.</p>
+            </div>
+          </div>
+
+          <label className="upload-box">
+            <input
+              type="file"
+              accept=".csv,.json,.jsonl"
+              onChange={(event) => setDatasetFile(event.target.files?.[0] || null)}
+            />
+            <strong>{datasetFile ? datasetFile.name : "Choose candidate dataset"}</strong>
+            <small>Supported: CSV, JSON, JSONL</small>
+          </label>
+
+          <button onClick={rankUploadedDataset} disabled={datasetLoading}>
+            {datasetLoading ? "Ranking Dataset..." : "Rank Uploaded Dataset"}
+          </button>
+        </div>
+
+        <div className="glass-card input-card">
+          <div className="section-title">
+            <span>03</span>
+            <div>
+              <h2>Resume Match</h2>
+              <p>Analyze one resume against the same job description.</p>
+            </div>
+          </div>
+
+          <label className="upload-box">
+            <input
+              type="file"
+              accept=".pdf,.docx"
+              onChange={(event) => setResumeFile(event.target.files?.[0] || null)}
+            />
+            <strong>{resumeFile ? resumeFile.name : "Choose resume file"}</strong>
+            <small>Supported: PDF, DOCX</small>
+          </label>
+
+          <button onClick={analyzeResume} disabled={resumeLoading}>
+            {resumeLoading ? "Analyzing Resume..." : "Analyze Resume Match"}
+          </button>
+        </div>
+      </section>
+
+      {resumeResult?.result && (
+        <section className="glass-card resume-report">
+          <div className="section-title">
+            <span>AI</span>
+            <div>
+              <h2>Resume Match Report</h2>
+              <p>Individual resume analysis with missing skills and improvement suggestions.</p>
+            </div>
+          </div>
+
+          <div className="resume-score-grid">
+            <div className="metric-card">
+              <h3>{resumeResult.result.match_score}%</h3>
+              <p>Match Score</p>
+            </div>
+            <div className="metric-card">
+              <h3>{resumeResult.result.recommendation}</h3>
+              <p>Recommendation</p>
+            </div>
+          </div>
+
+          <div className="two-column">
+            <div>
+              <h4>Matched Skills</h4>
+              <div className="skill-chip-wrap">
+                {(resumeResult.result.matched_skills || []).length > 0 ? (
+                  resumeResult.result.matched_skills.map((skill, index) => (
+                    <span key={index} className="skill-chip">
+                      {skill}
+                    </span>
+                  ))
+                ) : (
+                  <p>No matched skills found.</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <h4>Missing Skills</h4>
+              <div className="skill-chip-wrap">
+                {(resumeResult.result.missing_skills || []).length > 0 ? (
+                  resumeResult.result.missing_skills.map((skill, index) => (
+                    <span key={index} className="risk-chip">
+                      {skill}
+                    </span>
+                  ))
+                ) : (
+                  <p>No major missing skills found.</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="two-column">
+            <div>
+              <h4>How To Improve</h4>
+              <ul>
+                {(resumeResult.result.improvement_suggestions || []).map(
+                  (item, index) => (
+                    <li key={index}>{item}</li>
+                  )
+                )}
+              </ul>
+            </div>
+
+            <div>
+              <h4>Recommended Projects</h4>
+              <ul>
+                {(resumeResult.result.project_suggestions || []).map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
 
       {results && (
-        <div className="card results">
-          <h2>4. Interactive Recruiter Dashboard</h2>
-
-          <div className="stats-grid dashboard-stats">
-            <div className="stat-card">
-              <h3>{candidates.length}</h3>
-              <p>Candidates Returned</p>
+        <section className="dashboard-section">
+          <div className="dashboard-heading">
+            <div>
+              <span className="eyebrow">Interactive Recruiter Dashboard</span>
+              <h2>Candidate Intelligence Center</h2>
+              <p>
+                Power BI-style recruiter dashboard with search, filters, analytics,
+                explainability, and export.
+              </p>
             </div>
 
-            <div className="stat-card">
-              <h3>{results.total_records || 0}</h3>
-              <p>Total Records Processed</p>
-            </div>
+            <button type="button" onClick={downloadDashboardCsv}>
+              Download Ranked CSV
+            </button>
+          </div>
 
-            <div className="stat-card">
-              <h3>{candidates[0]?.dynamic_score || 0}</h3>
-              <p>Top Score</p>
+          <div className="kpi-grid">
+            <div className="kpi-card">
+              <span>Total Returned</span>
+              <strong>{candidates.length}</strong>
+              <p>Top ranked profiles</p>
             </div>
+            <div className="kpi-card">
+              <span>Records Processed</span>
+              <strong>{results.total_records || 0}</strong>
+              <p>Dataset size</p>
+            </div>
+            <div className="kpi-card">
+              <span>Top Score</span>
+              <strong>{candidates[0]?.dynamic_score || 0}</strong>
+              <p>Best candidate fit</p>
+            </div>
+            <div className="kpi-card">
+              <span>Average Score</span>
+              <strong>{averageScore}</strong>
+              <p>Returned candidate average</p>
+            </div>
+            <div className="kpi-card">
+              <span>Recommended</span>
+              <strong>{recommendedCount}</strong>
+              <p>Strong or recommended</p>
+            </div>
+            <div className="kpi-card">
+              <span>Avg Confidence</span>
+              <strong>{averageConfidence}%</strong>
+              <p>{strongConfidenceCount} strong confidence</p>
+            </div>
+          </div>
 
-            <div className="stat-card">
-              <h3>{averageScore}</h3>
-              <p>Average Score</p>
-            </div>
+          <div className="filter-bar">
+            <input
+              type="search"
+              placeholder="Search by role, company, location, skill, or candidate ID..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
 
-            <div className="stat-card">
-              <h3>{strongConfidenceCount}</h3>
-              <p>Strong Confidence</p>
-            </div>
+            <select
+              value={recommendationFilter}
+              onChange={(event) => setRecommendationFilter(event.target.value)}
+            >
+              <option value="all">All Recommendations</option>
+              {recommendationOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="number"
+              placeholder="Min score"
+              value={minScore}
+              onChange={(event) => setMinScore(event.target.value)}
+            />
           </div>
 
           {candidates.length === 0 && <p>No candidates found.</p>}
 
           {candidates.length > 0 && (
             <div className="dashboard-layout">
-              <div className="candidate-list-panel">
-                <h3>Top Candidates</h3>
+              <aside className="candidate-list-panel">
+                <div className="panel-title">
+                  <h3>Top Candidates</h3>
+                  <span>{filteredCandidates.length} shown</span>
+                </div>
 
                 <div className="candidate-card-grid">
-                  {candidates.map((candidate, index) => (
+                  {filteredCandidates.map((candidate, index) => (
                     <button
                       key={candidate.candidate_id || index}
                       className={`mini-candidate-card ${
@@ -377,25 +629,29 @@ function App() {
                         setSelectedCandidateId(String(candidate.candidate_id))
                       }
                     >
-                      <span className="rank-badge">#{index + 1}</span>
+                      <div className="mini-card-top">
+                        <span className="rank-badge">#{index + 1}</span>
+                        <span className="score-pill">
+                          {candidate.dynamic_score || 0}
+                        </span>
+                      </div>
                       <strong>{candidate.title || "Unknown Title"}</strong>
                       <small>{candidate.company || "N/A"}</small>
-                      <p>Score: {candidate.dynamic_score || 0}</p>
+                      <p>{candidate.location || "Location not available"}</p>
                     </button>
                   ))}
                 </div>
-              </div>
+              </aside>
 
-              <div className="candidate-detail-panel">
+              <section className="candidate-detail-panel">
                 <div className="slicer-row">
-                  <label htmlFor="candidate-slicer">Select Candidate</label>
-
+                  <label htmlFor="candidate-slicer">Candidate Slicer</label>
                   <select
                     id="candidate-slicer"
                     value={selectedCandidate?.candidate_id || ""}
                     onChange={(event) => setSelectedCandidateId(event.target.value)}
                   >
-                    {candidates.map((candidate, index) => (
+                    {filteredCandidates.map((candidate, index) => (
                       <option
                         key={candidate.candidate_id || index}
                         value={candidate.candidate_id}
@@ -410,49 +666,81 @@ function App() {
                 {selectedCandidate && (
                   <div className="selected-dashboard">
                     <div className="profile-card">
-                      <h3>{selectedCandidate.title || "Unknown Title"}</h3>
+                      <div className="profile-header">
+                        <div>
+                          <span className="rank-badge">
+                            Candidate {selectedCandidate.candidate_id || "N/A"}
+                          </span>
+                          <h3>{selectedCandidate.title || "Unknown Title"}</h3>
+                          <p>
+                            {selectedCandidate.company || "N/A"} •{" "}
+                            {selectedCandidate.location || "N/A"}
+                          </p>
+                        </div>
 
-                      <p>
-                        <strong>ID:</strong> {selectedCandidate.candidate_id || "N/A"}
-                      </p>
+                        <div className="score-gauge">
+                          <strong>{selectedCandidate.dynamic_score || 0}</strong>
+                          <span>Dynamic Score</span>
+                        </div>
+                      </div>
 
-                      <p>
-                        <strong>Company:</strong> {selectedCandidate.company || "N/A"}
-                      </p>
-
-                      <p>
-                        <strong>Location:</strong> {selectedCandidate.location || "N/A"}
-                      </p>
-
-                      <p>
-                        <strong>Experience:</strong> {selectedCandidate.experience || 0} years
-                      </p>
-
-                      <p className="score">
-                        <strong>Dynamic Score:</strong> {selectedCandidate.dynamic_score || 0}
-                      </p>
+                      <div className="profile-meta-grid">
+                        <div>
+                          <span>Experience</span>
+                          <strong>{selectedCandidate.experience || 0} years</strong>
+                        </div>
+                        <div>
+                          <span>Recommendation</span>
+                          <strong>
+                            {selectedCandidate.hiring_recommendation?.recommendation ||
+                              "Pending"}
+                          </strong>
+                        </div>
+                        <div>
+                          <span>Confidence</span>
+                          <strong>
+                            {selectedCandidate.hiring_recommendation?.confidence ||
+                              selectedCandidate.explainability?.confidence ||
+                              0}
+                            %
+                          </strong>
+                        </div>
+                      </div>
 
                       <p className="reason">
-                        <strong>Reason:</strong> {selectedCandidate.reason || "No reason available"}
+                        <strong>Reason:</strong>{" "}
+                        {selectedCandidate.reason || "No reason available"}
                       </p>
                     </div>
 
                     <div className="chart-card">
-                      <h3>Candidate Score Breakdown</h3>
-
+                      <h3>Score Breakdown</h3>
                       <ResponsiveContainer width="100%" height={260}>
                         <BarChart data={scoreChartData}>
+                          <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="name" />
                           <YAxis />
                           <Tooltip />
-                          <Bar dataKey="value" fill="#22d3ee" radius={[8, 8, 0, 0]} />
+                          <Bar dataKey="value" radius={[8, 8, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
 
                     <div className="chart-card">
-                      <h3>Skill Match Overview</h3>
+                      <h3>Top 10 Score Trend</h3>
+                      <ResponsiveContainer width="100%" height={260}>
+                        <LineChart data={rankTrendData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="rank" />
+                          <YAxis />
+                          <Tooltip />
+                          <Line type="monotone" dataKey="score" strokeWidth={3} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
 
+                    <div className="chart-card">
+                      <h3>Skill Match Overview</h3>
                       <ResponsiveContainer width="100%" height={260}>
                         <PieChart>
                           <Pie
@@ -463,10 +751,7 @@ function App() {
                             label
                           >
                             {skillChartData.map((entry, index) => (
-                              <Cell
-                                key={`${entry.name}-${index}`}
-                                fill={index === 0 ? "#06b6d4" : index === 1 ? "#7c3aed" : "#f59e0b"}
-                              />
+                              <Cell key={`${entry.name}-${index}`} />
                             ))}
                           </Pie>
                           <Tooltip />
@@ -474,30 +759,26 @@ function App() {
                       </ResponsiveContainer>
                     </div>
 
-                    <div className="explain-box dashboard-box">
+                    <div className="insight-card">
                       <h4>Why Selected</h4>
-
-                      <p>
-                        <strong>Confidence:</strong>{" "}
-                        {selectedCandidate.explainability?.confidence || 0}%
-                      </p>
-
                       <ul>
-                        {(selectedCandidate.explainability?.why_selected || []).map(
-                          (item, idx) => (
-                            <li key={idx}>{item}</li>
+                        {(selectedCandidate.explainability?.why_selected || []).length >
+                        0 ? (
+                          selectedCandidate.explainability.why_selected.map(
+                            (item, index) => <li key={index}>{item}</li>
                           )
+                        ) : (
+                          <li>No detailed explanation available.</li>
                         )}
                       </ul>
                     </div>
 
-                    <div className="explain-box dashboard-box">
+                    <div className="insight-card">
                       <h4>Matched JD Skills</h4>
-
                       <div className="skill-chip-wrap">
                         {(selectedCandidate.jd_skill_matches || []).length > 0 ? (
-                          selectedCandidate.jd_skill_matches.map((skill, idx) => (
-                            <span key={idx} className="skill-chip">
+                          selectedCandidate.jd_skill_matches.map((skill, index) => (
+                            <span key={index} className="skill-chip">
                               {skill}
                             </span>
                           ))
@@ -508,69 +789,83 @@ function App() {
                     </div>
 
                     {selectedCandidate.hiring_recommendation && (
-                      <div className="explain-box dashboard-box">
+                      <div className="insight-card wide">
                         <h4>AI Hiring Recommendation</h4>
 
-                        <p>
-                          <strong>Status:</strong>{" "}
-                          {selectedCandidate.hiring_recommendation.recommendation}
-                        </p>
+                        <div className="recommendation-grid">
+                          <div>
+                            <span>Status</span>
+                            <strong>
+                              {
+                                selectedCandidate.hiring_recommendation
+                                  .recommendation
+                              }
+                            </strong>
+                          </div>
+                          <div>
+                            <span>Confidence</span>
+                            <strong>
+                              {selectedCandidate.hiring_recommendation.confidence}%
+                            </strong>
+                          </div>
+                        </div>
 
-                        <p>
-                          <strong>Confidence:</strong>{" "}
-                          {selectedCandidate.hiring_recommendation.confidence}%
-                        </p>
+                        <p>{selectedCandidate.hiring_recommendation.decision}</p>
 
-                        <p>
-                          <strong>Decision:</strong>{" "}
-                          {selectedCandidate.hiring_recommendation.decision}
-                        </p>
+                        <div className="two-column">
+                          <div>
+                            <h5>Strengths</h5>
+                            <ul>
+                              {(
+                                selectedCandidate.hiring_recommendation.strengths ||
+                                []
+                              ).map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
 
-                        <h5>Strengths</h5>
-                        <ul>
-                          {(selectedCandidate.hiring_recommendation.strengths || []).map(
-                            (item, idx) => (
-                              <li key={idx}>{item}</li>
-                            )
-                          )}
-                        </ul>
-
-                        <h5>Risks</h5>
-                        <ul>
-                          {(selectedCandidate.hiring_recommendation.risks || []).map(
-                            (item, idx) => (
-                              <li key={idx}>{item}</li>
-                            )
-                          )}
-                        </ul>
+                          <div>
+                            <h5>Risks</h5>
+                            <ul>
+                              {(
+                                selectedCandidate.hiring_recommendation.risks || []
+                              ).map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
                       </div>
                     )}
 
-                    <div className="explain-box dashboard-box">
+                    <div className="insight-card wide">
                       <h4>Interview Questions</h4>
-
-                      <button onClick={() => generateInterviewQuestions(selectedCandidate)}>
+                      <button
+                        type="button"
+                        onClick={() => generateInterviewQuestions(selectedCandidate)}
+                      >
                         Generate Interview Questions
                       </button>
 
                       {interviewQuestions[selectedCandidate.candidate_id] && (
-                        <ul>
+                        <ol>
                           {interviewQuestions[selectedCandidate.candidate_id].map(
-                            (question, idx) => (
-                              <li key={idx}>{question}</li>
+                            (question, index) => (
+                              <li key={index}>{question}</li>
                             )
                           )}
-                        </ul>
+                        </ol>
                       )}
                     </div>
                   </div>
                 )}
-              </div>
+              </section>
             </div>
           )}
-        </div>
+        </section>
       )}
-    </div>
+    </main>
   )
 }
 
