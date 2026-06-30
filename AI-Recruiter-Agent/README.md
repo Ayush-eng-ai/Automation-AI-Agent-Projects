@@ -1,344 +1,209 @@
-# AI Recruiter Agent
+# 🤖 AI Recruiter Agent
 
-AI Recruiter Agent is a full-stack AI-powered recruitment platform that helps recruiters analyze a job description, rank thousands of candidates, explain why candidates are selected, match individual resumes, and generate interview questions.
+### Enterprise AI-Powered Candidate Discovery & Ranking Platform
 
-This project started as a hackathon candidate-ranking solution and has been converted into a recruiter-friendly SaaS-style web application.
-
----
-
-## Live Links
-
-- Frontend: https://ai-recruiter-agent-frontend.onrender.com/
-- Backend API Docs: https://ai-recruiter-backend-7vet.onrender.com/docs
-- GitHub Repository: https://github.com/Ayush-eng-ai/Automation-AI-Agent-Projects
-- Portfolio: https://data-analysis-portfolio-six.vercel.app/
-- Medium Article: https://medium.com/@ayushrajput8404/how-i-built-an-ai-recruiter-agent-from-hackathon-problem-to-full-stack-ai-product-e8feb9281cf2
+<p align="center">
+AI Recruiter Agent is an intelligent, full-stack AI platform designed to transform how recruiters discover, evaluate, and rank candidates. Built for the Redrob Hackathon, it goes beyond traditional keyword matching by combining skill analysis, experience alignment, behavioral signals, and explainable AI to deliver accurate, transparent, and high-quality hiring recommendations.
+</p>
 
 ---
 
-## Problem Statement
+## 🚀 Live Demo
 
-Recruiters often receive hundreds or thousands of resumes for a single role. Manually screening candidates is slow, inconsistent, and difficult to explain.
-
-AI Recruiter Agent solves this by converting a backend ranking pipeline into a complete web application where recruiters can upload a job description and candidate dataset, then instantly view ranked candidates with explainable AI recommendations.
-
----
-
-## Key Features
-
-### Candidate Ranking
-
-- Upload a candidate dataset in CSV, JSON, or JSONL format
-- Parse job description requirements
-- Rank candidates using dynamic scoring
-- Return top candidates based on JD fit
-- Show candidate score, experience, company, location, and reason for selection
-
-### Explainable AI Recommendation
-
-- Shows why a candidate was selected
-- Displays matched JD skills
-- Displays role match evidence
-- Displays confidence score
-- Highlights strengths and risks
-- Generates hiring recommendation such as Strongly Recommended, Recommended, Consider, or Not Recommended
-
-### Resume Analysis
-
-- Upload individual PDF or DOCX resume
-- Extract resume text
-- Match resume against job description
-- Show matched skills and missing skills
-- Provide resume improvement suggestions
-- Suggest portfolio projects based on skill gaps
-
-### Interview Question Generator
-
-- Generates role-specific interview questions
-- Supports roles such as Data Scientist, ML Engineer, Search Engineer, Recommendation Systems Engineer, Data Engineer, Backend Engineer, and Software Engineer
-
-### Recruiter Dashboard
-
-- Interactive candidate dashboard
-- KPI cards
-- Candidate cards
-- Candidate slicer/dropdown
-- Candidate detail view
-- Score chart
-- Skill match chart
-- Explainability panel
-- Hiring recommendation panel
-- Interview questions panel
+| Resource          | Link                                                                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 🌐 Frontend       | https://ai-recruiter-agent-frontend.onrender.com/                                                                                  |
+| ⚙ Backend API     | https://ai-recruiter-backend-7vet.onrender.com/docs                                                                                |
+| 💻 GitHub         | https://github.com/Ayush-eng-ai/Automation-AI-Agent-Projects                                                                       |
+| 📄 Medium Article | https://medium.com/@ayushrajput8404/how-i-built-an-ai-recruiter-agent-from-hackathon-problem-to-full-stack-ai-product-e8feb9281cf2 |
+| 🎯 Portfolio      | https://data-analysis-portfolio-six.vercel.app/                                                                                    |
 
 ---
 
-## Tech Stack
+# 📌 Project Overview
 
-### Backend
+AI Recruiter Agent is a production-inspired AI recruitment platform developed for the **Redrob Intelligent Candidate Discovery & Ranking Challenge**.
 
-- Python
-- FastAPI
-- Pandas
-- PDFPlumber
-- python-docx
-- JSON / JSONL / CSV processing
-- REST API
+Instead of relying on keyword matching alone, the platform evaluates candidates using multiple dimensions including:
 
-### Frontend
+* Technical skill relevance
+* Role similarity
+* Experience alignment
+* Behavioral hiring signals
+* Explainable AI reasoning
+* Hiring recommendation
+* Recruiter availability indicators
 
-- React.js
-- JavaScript
-- CSS
-- Recharts
-- Vite
-
-### Deployment
-
-- Render
-- GitHub
+The system is designed to help recruiters efficiently identify high-quality candidates from very large datasets while providing transparent explanations for every ranking decision.
 
 ---
 
-## Project Architecture
+# 🎯 Problem Statement
 
-```text
-AI-Recruiter-Agent/
-│
-├── backend/
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── schemas.py
-│   │   ├── jd_parser.py
-│   │   ├── dataset_parser.py
-│   │   ├── ranking_agent.py
-│   │   ├── scoring_engine.py
-│   │   ├── explanation_engine.py
-│   │   ├── hiring_recommendation.py
-│   │   ├── resume_parser.py
-│   │   ├── resume_matcher.py
-│   │   └── interview_generator.py
-│   │
-│   ├── uploads/
-│   ├── outputs/
-│   └── requirements.txt
-│
-├── frontend/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   └── App.css
-│   │
-│   ├── package.json
-│   └── vite.config.js
-│
-└── README.md
-```
+Traditional Applicant Tracking Systems (ATS) primarily rely on keyword matching, which often leads to:
+
+* Missing high-quality candidates with different terminology
+* Ranking keyword-stuffed resumes too highly
+* Ignoring recruiter engagement and availability signals
+* Providing little explanation for candidate rankings
+
+The Redrob Hackathon specifically challenged participants to move beyond keyword matching and reason about what the job description actually means.
 
 ---
+
+# 💡 Our Solution
+
+AI Recruiter Agent combines structured profile analysis, recruiter behavioral signals, role understanding, and explainable AI to generate intelligent candidate rankings.
+
+The platform supports:
+
+* Job Description Parsing
+* Resume Parsing
+* Candidate Dataset Processing
+* Dynamic Candidate Ranking
+* Explainable AI Recommendations
+* Interview Question Generation
+* Hiring Recommendation
+* Confidence Score
+* Submission CSV Generation (Hackathon Ready)
+
+---
+
+# ⭐ Key Features
+
+### AI Candidate Ranking
+
+* Intelligent candidate scoring
+* Role-aware matching
+* Experience-based ranking
+* Skill relevance analysis
+
+### Explainable AI
+
+Every ranked candidate includes:
+
+* Why Selected
+* Strengths
+* Risks
+* Hiring Recommendation
+* Confidence Score
+
+### Resume Intelligence
+
+* Resume Parsing
+* Resume Analysis
+* Skill Extraction
+* Resume Match Score
+
+### Recruiter Assistance
+
+* Interview Question Generation
+* Hiring Recommendation
+* Candidate Comparison
+* Top Candidate Selection
+
+### Hackathon Submission Support
+
+* Top-100 Candidate Generator
+* CSV Export
+* Validator-Compatible Output
+* Reproducible Ranking Pipeline
+
+---
+
 # 🏗 System Architecture
 
 ```text
-                    Job Description
-                           │
-                           ▼
-                    JD Parser Engine
-                           │
-                           ▼
-                  Candidate Ranking Engine
-                           │
-          ┌────────────────┼────────────────┐
-          ▼                ▼                ▼
-   Skill Matching   Experience Match   Role Match
-          │                │                │
-          └────────────────┼────────────────┘
-                           ▼
-                   Dynamic Scoring
-                           │
-                           ▼
-                 Explainable AI Layer
-                           │
-                           ▼
-              Hiring Recommendation Engine
-                           │
-                           ▼
-                 Interview Question Generator
-
-
-
-                    Resume Upload
-                           │
-                           ▼
-                    Resume Parser
-                           │
-                           ▼
-                 Resume Match Engine
-                           │
-                           ▼
-               Skill Gap Identification
-                           │
-                           ▼
-              Resume Improvement Feedback
+Recruiter
+    │
+    ▼
+Upload Job Description
+    │
+    ▼
+JD Parser
+    │
+    ▼
+Upload Candidate Dataset (.jsonl)
+    │
+    ▼
+Feature Extraction
+    │
+    ├── Skills
+    ├── Experience
+    ├── Roles
+    ├── Career History
+    ├── Behavioral Signals
+    └── Recruiter Availability
+    │
+    ▼
+AI Ranking Engine
+    │
+    ├── Role Match
+    ├── Skill Match
+    ├── Experience Match
+    ├── Behavioral Score
+    ├── Explainable AI
+    └── Risk Detection
+    │
+    ▼
+Top Ranked Candidates
+    │
+    ▼
+React Recruiter Dashboard
 ```
 
 ---
 
-## Backend API Endpoints
+# 🧠 High-Level Workflow
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/` | Health check |
-| POST | `/api/analyze` | Test job description input |
-| POST | `/api/jd/parse` | Extract skills, roles, and experience from JD |
-| GET | `/api/candidates/count` | Count candidates from configured dataset |
-| GET | `/api/candidates/first` | Preview first candidate |
-| GET | `/api/candidates/top` | Rank default/sample candidates |
-| POST | `/api/rank` | Rank candidates using JD |
-| POST | `/api/rank/download` | Download ranked results as CSV |
-| POST | `/api/dataset/upload` | Upload candidate dataset |
-| POST | `/api/rank/uploaded-dataset` | Rank uploaded dataset |
-| POST | `/api/resume/upload` | Upload and parse resume |
-| POST | `/api/resume/match` | Match resume with JD |
-| GET | `/api/interview/questions` | Generate interview questions by title |
+1. Recruiter uploads a Job Description.
+2. Recruiter uploads candidate dataset.
+3. The backend extracts important hiring requirements.
+4. Every candidate profile is analyzed.
+5. AI computes a composite ranking score.
+6. Candidates are sorted by overall relevance.
+7. Recruiters receive explainable hiring recommendations.
+8. Top candidates can be exported as a submission-ready CSV.
 
 ---
 
-## How the Ranking Works
+# 🖥 Current Dashboard Features
 
-1. The recruiter enters a job description.
-2. The backend extracts important JD skills, roles, and experience requirements.
-3. The recruiter uploads a candidate dataset.
-4. Each candidate profile is converted into searchable text using title, summary, career history, and skills.
-5. The scoring engine calculates:
-   - Base candidate score
-   - Title score
-   - Experience score
-   - AI skill score
-   - Career evidence score
-   - Behavior signal score
-   - Penalty score
-   - JD skill score
-   - JD role score
-   - JD experience score
-6. Candidates are sorted by dynamic score.
-7. The frontend displays an interactive recruiter dashboard.
+* Upload Job Description
+* Upload Resume
+* Upload Candidate Dataset
+* Candidate Ranking
+* Resume Analysis
+* Hiring Recommendation
+* Interview Questions
+* Explainable AI
+* Confidence Score
+* Strengths & Risks
+* Live API Integration
 
 ---
 
-## Local Setup
+# 📸 Screenshots
 
-### Backend Setup
+> Add screenshots here after capturing your application.
 
-```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
-
-Backend runs at:
-
-```text
-http://127.0.0.1:8000
-```
-
-API documentation:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-### Frontend Setup
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Frontend runs at:
-
-```text
-http://localhost:5173
-```
+* Recruiter Dashboard
+* Candidate Ranking Results
+* Candidate Details
+* Resume Analysis
+* Hiring Recommendation
+* Interview Questions
 
 ---
 
-## Required Frontend Dependency
+**Next sections in README will include:**
 
-The dashboard uses Recharts. Install it if missing:
-
-```bash
-npm install recharts
-```
-
----
-
-## Supported File Formats
-
-### Candidate Dataset
-
-- `.csv`
-- `.json`
-- `.jsonl`
-
-### Resume Upload
-
-- `.pdf`
-- `.docx`
-
----
-
-## Example Workflow
-
-1. Paste a job description for a Data Scientist, ML Engineer, Search Engineer, or Backend Engineer role.
-2. Upload candidate dataset in CSV, JSON, or JSONL format.
-3. Click **Rank Uploaded Dataset**.
-4. View top candidate KPIs.
-5. Select any candidate from the candidate list or slicer.
-6. Review score, matched skills, explainability, confidence, strengths, risks, and hiring recommendation.
-7. Generate interview questions for the selected candidate.
-8. Optionally upload a resume and match it against the same job description.
-
----
-
-## Unique Value
-
-Unlike a simple resume parser, AI Recruiter Agent combines:
-
-- Candidate ranking
-- JD-based dynamic scoring
-- Explainable recommendation
-- Resume matching
-- Skill gap analysis
-- Interview question generation
-- Recruiter dashboard UI
-
-This makes it a complete AI recruitment assistant instead of only a backend script.
-
----
-
-## Future Improvements
-
-- Authentication for recruiters
-- Candidate shortlisting
-- Candidate comparison
-- PDF candidate report export
-- Email report sharing
-- Vector search using FAISS or Qdrant
-- LLM-powered resume summarization
-- Chat with resume
-- Chat with job description
-- AI recruiter copilot
-- Admin dashboard
-- Role-based access control
-
----
-
-## Author
-
-**Ayush Rajput**  
-Aspiring Data Scientist and Full Stack AI Developer
-
-Portfolio: https://data-analysis-portfolio-six.vercel.app/
-GitHub: https://github.com/Ayush-eng-ai
-Medium: https://medium.com/@ayushrajput8404/how-i-built-an-ai-recruiter-agent-from-hackathon-problem-to-full-stack-ai-product-e8feb9281cf2?sharedUserId=ayushrajput8404
+* AI Ranking Methodology
+* Behavioral Signal Scoring
+* Explainable AI Pipeline
+* Project Structure
+* Installation Guide
+* API Documentation
+* Submission Generation
+* Future Roadmap
+* Enterprise Architecture
