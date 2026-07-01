@@ -741,7 +741,7 @@ function App() {
                           <XAxis dataKey="name" />
                           <YAxis />
                           <Tooltip />
-                          <Bar dataKey="value" radius={[8, 8, 0, 0]} />
+                          <Bar dataKey="value" fill="#22d3ee" radius={[8, 8, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -754,7 +754,7 @@ function App() {
                           <XAxis dataKey="rank" />
                           <YAxis />
                           <Tooltip />
-                          <Line type="monotone" dataKey="score" strokeWidth={3} />
+                          <Line type="monotone" dataKey="score" stroke="#22d3ee" strokeWidth={3} />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
@@ -771,7 +771,10 @@ function App() {
                             label
                           >
                             {skillChartData.map((entry, index) => (
-                              <Cell key={`${entry.name}-${index}`} />
+                              <Cell
+                                key={`${entry.name}-${index}`}
+                                fill={["#22d3ee", "#7c3aed", "#3b82f6", "#f59e0b"][index % 4]}
+                              />
                             ))}
                           </Pie>
                           <Tooltip />
