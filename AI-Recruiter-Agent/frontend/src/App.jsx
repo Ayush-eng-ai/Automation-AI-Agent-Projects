@@ -46,6 +46,7 @@ function App() {
   const [resumeResult, setResumeResult] = useState(null)
   const [interviewQuestions, setInterviewQuestions] = useState({})
   const [datasetLoading, setDatasetLoading] = useState(false)
+  const [csvLoading, setCsvLoading] = useState(false)
   const [resumeLoading, setResumeLoading] = useState(false)
   const [selectedCandidateId, setSelectedCandidateId] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
@@ -240,48 +241,48 @@ function App() {
   }
 
   const downloadSubmissionCsv = async () => {
-  if (!jobDescription.trim()) {
-    alert("Please enter a Job Description")
-    return
-  }
-
-  if (!datasetFile) {
-    alert("Please upload candidate dataset")
-    return
-  }
-
-  try {
-    setDatasetLoading(true)
-
-    const formData = new FormData()
-    formData.append("job_description", jobDescription)
-    formData.append("file", datasetFile)
-
-    const response = await fetch(`${API_BASE_URL}/api/submission/upload-and-download`, {
-      method: "POST",
-      body: formData,
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      alert(errorText || "CSV generation failed")
+    if (!jobDescription.trim()) {
+      alert("Please enter a Job Description")
       return
     }
 
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = "Alpha_Decoders.csv"
-    link.click()
-    URL.revokeObjectURL(url)
-  } catch (error) {
-    console.error("CSV Download Error:", error)
-    alert("CSV generate nahi ho paayi. Backend check karo.")
-  } finally {
-    setDatasetLoading(false)
+    if (!datasetFile) {
+      alert("Please upload candidate dataset")
+      return
+    }
+
+    try {
+      setCsvLoading(true)
+
+      const formData = new FormData()
+      formData.append("job_description", jobDescription)
+      formData.append("file", datasetFile)
+
+      const response = await fetch(`${API_BASE_URL}/api/submission/upload-and-download`, {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        alert(errorText || "CSV generation failed")
+        return
+      }
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = "Alpha_Decoders.csv"
+      link.click()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("CSV Download Error:", error)
+      alert("CSV generate nahi ho paayi. Backend check karo.")
+    } finally {
+      setCsvLoading(false)
+    }
   }
-}
 
   const analyzeResume = async () => {
     if (!jobDescription.trim()) {
@@ -472,17 +473,25 @@ function App() {
             <small>Supported: CSV, JSON, JSONL</small>
           </label>
 
-          <button onClick={rankUploadedDataset} disabled={datasetLoading}>
-            {datasetLoading ? "Ranking Dataset..." : "Rank Uploaded Dataset"}
+          <button
+            type="button"
+            onClick={rankUploadedDataset}
+            disabled={datasetLoading || csvLoading}
+          >
+            {datasetLoading ? "Ranking Candidates..." : "Rank Uploaded Dataset"}
           </button>
 
           <button
             type="button"
             className="secondary-button"
-            onClick={downloadSubmissionCsv}
-            disabled={datasetLoading}
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              downloadSubmissionCsv()
+            }}
+            disabled={datasetLoading || csvLoading}
           >
-            {datasetLoading ? "Generating CSV..." : "Generate Submission CSV"}
+            {csvLoading ? "Generating CSV..." : "Generate Submission CSV"}
           </button>
 
           {datasetLoading && (
@@ -492,7 +501,18 @@ function App() {
                 alt="Loading AI Recruiter Agent"
                 className="loading-logo"
               />
-              <p>AI is ranking candidates...</p>
+              <p>AI is ranking candidates for dashboard preview...</p>
+            </div>
+          )}
+
+          {csvLoading && (
+            <div className="loading-card">
+              <img
+                src="/brand/loading-logo.png"
+                alt="Generating Submission CSV"
+                className="loading-logo"
+              />
+              <p>Generating submission CSV from ranking engine...</p>
             </div>
           )}
         </div>
@@ -516,7 +536,11 @@ function App() {
             <small>Supported: PDF, DOCX</small>
           </label>
 
-          <button onClick={analyzeResume} disabled={resumeLoading}>
+          <button
+            type="button"
+            onClick={analyzeResume}
+            disabled={resumeLoading}
+          >
             {resumeLoading ? "Analyzing Resume..." : "Analyze Resume Match"}
           </button>
         </div>
