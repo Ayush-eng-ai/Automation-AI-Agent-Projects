@@ -239,6 +239,50 @@ function App() {
     }
   }
 
+  const downloadSubmissionCsv = async () => {
+  if (!jobDescription.trim()) {
+    alert("Please enter a Job Description")
+    return
+  }
+
+  if (!datasetFile) {
+    alert("Please upload candidate dataset")
+    return
+  }
+
+  try {
+    setDatasetLoading(true)
+
+    const formData = new FormData()
+    formData.append("job_description", jobDescription)
+    formData.append("file", datasetFile)
+
+    const response = await fetch(`${API_BASE_URL}/api/submission/upload-and-download`, {
+      method: "POST",
+      body: formData,
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      alert(errorText || "CSV generation failed")
+      return
+    }
+
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = "Alpha_Decoders.csv"
+    link.click()
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error("CSV Download Error:", error)
+    alert("CSV generate nahi ho paayi. Backend check karo.")
+  } finally {
+    setDatasetLoading(false)
+  }
+}
+
   const analyzeResume = async () => {
     if (!jobDescription.trim()) {
       alert("Please enter a Job Description")
@@ -430,6 +474,15 @@ function App() {
 
           <button onClick={rankUploadedDataset} disabled={datasetLoading}>
             {datasetLoading ? "Ranking Dataset..." : "Rank Uploaded Dataset"}
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={downloadSubmissionCsv}
+            disabled={datasetLoading}
+          >
+            {datasetLoading ? "Generating CSV..." : "Generate Submission CSV"}
           </button>
 
           {datasetLoading && (

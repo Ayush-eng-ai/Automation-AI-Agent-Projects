@@ -23,6 +23,7 @@ from app.dataset_parser import load_dataset
 from app.scoring_engine import calculate_dynamic_score
 from app.explanation_engine import generate_candidate_explanation
 from app.hiring_recommendation import generate_hiring_recommendation
+from rank import create_submission
 
 
 app = FastAPI(
@@ -260,4 +261,38 @@ async def rank_uploaded_dataset(
         raise HTTPException(
             status_code=500,
             detail=str(error)
+        )
+    
+
+
+@app.post("/api/submission/upload-and-download")
+async def upload_and_download_submission(
+    job_description: str = Form(...),
+    file: UploadFile = File(...)
+):
+    try:
+        input_filename = f"submission_input_{uuid.uuid4().hex[:8]}_{file.filename}"
+        input_path = os.path.join("uploads", input_filename)
+
+        with open(input_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        output_filename = f"Alpha_Decoders_{uuid.uuid4().hex[:8]}.csv"
+        output_path = os.path.join("outputs", output_filename)
+
+        create_submission(
+            candidates_path=input_path,
+            output_path=output_path
+        )
+
+        return FileResponse(
+            path=output_path,
+            filename=output_filename,
+            media_type="text/csv"
+        )
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Submission CSV generation failed: {str(error)}"
         )
