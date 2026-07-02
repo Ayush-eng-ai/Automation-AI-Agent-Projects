@@ -11,7 +11,7 @@ __pycache__/
 # =========================
 .venv/
 venv/
-backend/venv/
+AI-Recruiter-Agent/backend/venv/
 
 # =========================
 # Environment Variables
@@ -24,21 +24,21 @@ backend/venv/
 # =========================
 *.jsonl
 *.gz
-backend/candidates.jsonl
-backend/candidates.jsonl.gz
+AI-Recruiter-Agent/backend/candidates.jsonl
+AI-Recruiter-Agent/backend/candidates.jsonl.gz
 
 # =========================
 # Backend Generated Files
 # =========================
-backend/uploads/
-backend/outputs/
-!backend/outputs/.gitkeep
+AI-Recruiter-Agent/backend/uploads/
+AI-Recruiter-Agent/backend/outputs/
+!AI-Recruiter-Agent/backend/outputs/.gitkeep
 
 # =========================
 # Frontend
 # =========================
 node_modules/
-frontend/node_modules/
+AI-Recruiter-Agent/frontend/node_modules/
 
 # =========================
 # IDE
@@ -47,7 +47,7 @@ frontend/node_modules/
 .idea/
 
 # =========================
-# OS Files
+# OS
 # =========================
 .DS_Store
 Thumbs.db
